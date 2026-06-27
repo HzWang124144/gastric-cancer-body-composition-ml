@@ -36,8 +36,6 @@ Sensitivity analysis for recurrence prediction.
 SHAP-based model interpretation.
 Bootstrap-based SHAP feature-importance stability analysis.
 
-This repository does not include the TCGA/TCIA exploratory transcriptomic analysis code. The public-cohort transcriptomic analysis in the manuscript was exploratory and was not used for external validation of the machine-learning models.
-
 Data availability
 
 Individual-level clinical data and imaging-derived body composition data are not publicly shared because of patient privacy, institutional ethical restrictions, and data-use limitations.
