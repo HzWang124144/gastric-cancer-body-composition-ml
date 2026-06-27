@@ -1,0 +1,137 @@
+from sklearn.impute import IterativeImputer
+#%%
+# 2. 多重插补填补缺失值
+imputer = IterativeImputer(random_state=42)
+df_imputed = pd.DataFrame(imputer.fit_transform(data), columns=data.columns)
+#%%
+# 找出原始数据中的缺失位置
+missing_mask = data.isnull()
+
+# 按行组织被插补的值
+imputed_by_row = {}
+for i in range(len(data)):
+    row_imputed = []
+    for col in data.columns:
+        if missing_mask.iloc[i][col] and not pd.isna(df_imputed.iloc[i][col]):
+            row_imputed.append((col, df_imputed.iloc[i][col]))
+    
+    if row_imputed:
+        imputed_by_row[i] = row_imputed
+
+# 显示结果
+if imputed_by_row:
+    print("被插补的位置和值：")
+    print("-" * 50)
+    for i, row_imputed in imputed_by_row.items():
+        print(f"行 {i+1}:")
+        for col, value in row_imputed:
+            print(f"  {col}: {value}")
+else:
+    print("没有找到被插补的值（可能原始数据没有缺失值）")
+#%%
+import pandas as pd
+import numpy as np
+
+# 假设你已经有：
+# data = pd.read_excel('baselinebd.xlsx')
+# imputer = IterativeImputer(random_state=42)
+# df_imputed = pd.DataFrame(imputer.fit_transform(data), columns=data.columns)
+
+# 1. 找出原始数据中的缺失位置
+missing_mask = data.isna()
+
+# 2. 整理所有被插补的位置和插补值
+imputed_records = []
+
+for row_idx in range(data.shape[0]):
+    for col in data.columns:
+        if missing_mask.loc[row_idx, col]:
+            imputed_records.append({
+                "DataFrame_row": row_idx,                  # Python中的行号，从0开始
+                "Excel_row": row_idx + 2,                  # Excel中的实际行号，假设第1行为表头
+                "Variable": col,
+                "Original_value": data.loc[row_idx, col],
+                "Imputed_value": df_imputed.loc[row_idx, col]
+            })
+
+imputed_values_table = pd.DataFrame(imputed_records)
+
+# 3. 查看全部插补结果
+print("全部被插补的位置和值：")
+print(imputed_values_table)
+
+# 4. 按变量统计插补数量
+imputed_summary_by_variable = (
+    imputed_values_table
+    .groupby("Variable")
+    .size()
+    .reset_index(name="Imputed_n")
+    .sort_values("Imputed_n", ascending=False)
+)
+
+print("\n各变量被插补数量：")
+print(imputed_summary_by_variable)
+
+# 5. 导出 Excel 文件
+output_file = "Imputed_Values_Check.xlsx"
+
+with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+    imputed_values_table.to_excel(writer, sheet_name="Imputed_values", index=False)
+    imputed_summary_by_variable.to_excel(writer, sheet_name="Summary_by_variable", index=False)
+    data.to_excel(writer, sheet_name="Original_data", index=False)
+    df_imputed.to_excel(writer, sheet_name="Imputed_data", index=False)
+
+#%%
+import pandas as pd
+import numpy as np
+
+# 假设你已经有：
+# data = pd.read_excel('baselinebd.xlsx')
+# imputer = IterativeImputer(random_state=42)
+# df_imputed = pd.DataFrame(imputer.fit_transform(data), columns=data.columns)
+
+# 1. 找出原始数据中的缺失位置
+missing_mask = data.isna()
+
+# 2. 整理所有被插补的位置和插补值
+imputed_records = []
+
+for row_idx in range(data.shape[0]):
+    for col in data.columns:
+        if missing_mask.loc[row_idx, col]:
+            imputed_records.append({
+                "DataFrame_row": row_idx,                  # Python中的行号，从0开始
+                "Excel_row": row_idx + 2,                  # Excel中的实际行号，假设第1行为表头
+                "Variable": col,
+                "Original_value": data.loc[row_idx, col],
+                "Imputed_value": df_imputed.loc[row_idx, col]
+            })
+
+imputed_values_table = pd.DataFrame(imputed_records)
+
+# 3. 查看全部插补结果
+print("全部被插补的位置和值：")
+print(imputed_values_table)
+
+# 4. 按变量统计插补数量
+imputed_summary_by_variable = (
+    imputed_values_table
+    .groupby("Variable")
+    .size()
+    .reset_index(name="Imputed_n")
+    .sort_values("Imputed_n", ascending=False)
+)
+
+print("\n各变量被插补数量：")
+print(imputed_summary_by_variable)
+
+# 5. 导出 Excel 文件
+output_file = "Imputed_Values_Check.xlsx"
+
+with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+    imputed_values_table.to_excel(writer, sheet_name="Imputed_values", index=False)
+    imputed_summary_by_variable.to_excel(writer, sheet_name="Summary_by_variable", index=False)
+    data.to_excel(writer, sheet_name="Original_data", index=False)
+    df_imputed.to_excel(writer, sheet_name="Imputed_data", index=False)
+
+print(f"\n插补结果已导出：{output_file}")
